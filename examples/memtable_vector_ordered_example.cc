@@ -13,6 +13,7 @@ int main() {
   options.create_if_missing = true;
   options.error_if_exists = false;
   options.allow_concurrent_memtable_write = false;
+  options.use_fsync = true;
   // Use our simple vector-ordered memtable
   options.memtable_factory = std::make_shared<VectorOrderedRepFactory>();
 
@@ -28,7 +29,9 @@ int main() {
   if (!s.ok()) { std::cerr << s.ToString() << std::endl; }
   s = db->Put(WriteOptions(), "b", "2");
   if (!s.ok()) { std::cerr << s.ToString() << std::endl; }
-  s = db->Put(WriteOptions(), "a", "3");  // newer version of "a"
+  WriteOptions w_sync;
+  w_sync.sync = true;  // ensure WAL/fsync is durable before returning
+  s = db->Put(w_sync, "a", "3");  // newer version of "a"
   if (!s.ok()) { std::cerr << s.ToString() << std::endl; }
 
   // Observe read before flush
