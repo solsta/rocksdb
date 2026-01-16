@@ -43,3 +43,9 @@ add_executable(multi_processes_example
   multi_processes_example.cc)
 target_link_libraries(multi_processes_example
   ${ROCKSDB_LIB})
+
+# Example using VectorOrderedRepFactory memtable
+add_executable(memtable_vector_ordered_example
+  memtable_vector_ordered_example.cc)
+target_link_libraries(memtable_vector_ordered_example
+  ${ROCKSDB_LIB})
