@@ -8,3 +8,5 @@ options_file_example
 rocksdb_backup_restore_example
 simple_example
 transaction_example
+durability_demo
+mvcc_demo
