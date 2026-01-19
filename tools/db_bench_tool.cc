@@ -54,6 +54,7 @@
 #include "rocksdb/filter_policy.h"
 #include "rocksdb/memtablerep.h"
 #include "rocksdb/options.h"
+#include "memtable/vector_ordered_rep.h"
 #include "rocksdb/perf_context.h"
 #include "rocksdb/persistent_cache.h"
 #include "rocksdb/rate_limiter.h"
@@ -1911,6 +1912,9 @@ static Status CreateMemTableRepFactory(
     factory->reset(new VectorRepFactory());
   } else if (!strcasecmp(FLAGS_memtablerep.c_str(), "hash_linkedlist")) {
     factory->reset(NewHashLinkListRepFactory(FLAGS_hash_bucket_count));
+  } else if (!strcasecmp(FLAGS_memtablerep.c_str(),
+                         VectorOrderedRepFactory::kClassName())) {
+    factory->reset(new VectorOrderedRepFactory());
   } else {
     std::unique_ptr<MemTableRepFactory> unique;
     s = MemTableRepFactory::CreateFromString(config_options, FLAGS_memtablerep,

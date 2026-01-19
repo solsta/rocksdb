@@ -1,5 +1,7 @@
 make_config.mk
 rocksdb.pc
+examples/memtable_two_flushes_compaction_example
+examples/memtable_vector_ordered_example
 
 *.a
 *.arc
