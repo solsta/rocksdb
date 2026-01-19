@@ -104,3 +104,4 @@ cmake-build-*
 third-party/folly/
 .cache
 *.sublime-*
+examples/visibility_demo
