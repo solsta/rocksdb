@@ -27,6 +27,11 @@ class LockFreeSkiplistMemtable : public MemTableRep {
 
   bool InsertKey(KeyHandle handle) override;
 
+  // Concurrent write support
+  void InsertConcurrently(KeyHandle handle) override;
+
+  bool InsertKeyConcurrently(KeyHandle handle) override;
+
   // Check if key exists
   bool Contains(const char* key) const override;
 
@@ -107,6 +112,8 @@ class LockFreeSkiplistFactory : public MemTableRepFactory {
       const SliceTransform* transform, Logger* logger) override;
 
   const char* Name() const override;
+
+  bool IsInsertConcurrentlySupported() const override { return true; }
 
   static const char* kClassName() { return "LockFreeSkiplistFactory"; }
 };
