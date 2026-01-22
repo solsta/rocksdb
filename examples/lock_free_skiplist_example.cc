@@ -36,12 +36,12 @@ int main() {
   
   // Other settings
   options.write_buffer_size = 256 * 1024 * 1024;  // 256 MB (reasonable for testing)
-  options.allow_concurrent_memtable_write = false;  // Lock-free skiplist doesn't support concurrent writes
+  options.allow_concurrent_memtable_write = true;  // Lock-free skiplist supports concurrent writes
   
   std::cout << "   Database configuration:" << std::endl;
   std::cout << "   - Memtable type: LockFreeSkiplistMemtable" << std::endl;
   std::cout << "   - Write buffer size: 256 MB" << std::endl;
-  std::cout << "   - Concurrent memtable writes: disabled" << std::endl;
+  std::cout << "   - Concurrent memtable writes: enabled" << std::endl;
   std::cout << std::endl;
 
   // Open database
