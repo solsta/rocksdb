@@ -105,3 +105,4 @@ third-party/folly/
 .cache
 *.sublime-*
 examples/visibility_demo
+examples/lock_free_skiplist_example
