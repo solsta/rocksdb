@@ -19,10 +19,7 @@ int main() {
   std::cout << "   (This demonstrates the memtable structure)" << std::endl;
   
   // Create a simple memtable factory
-  auto factory = std::make_shared<LockFreeSkiplistFactory>(
-      32,  // max_height
-      4    // branching_factor
-  );
+  auto factory = std::make_shared<LockFreeSkiplistFactory>();
   
   std::cout << "   ✓ Created LockFreeSkiplistFactory: " << factory->Name() << std::endl;
   std::cout << std::endl;
@@ -76,6 +73,7 @@ int main() {
   };
   
   for (size_t i = 0; i < keys.size(); ++i) {
+    std::cerr << "Inserting: " << keys[i] << " -> " << values[i] << std::endl;
     status = db->Put(write_options, keys[i], values[i]);
     if (!status.ok()) {
       std::cerr << "Failed to write key: " << keys[i] << std::endl;
