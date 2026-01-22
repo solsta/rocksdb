@@ -4,12 +4,15 @@
 #include "rocksdb/comparator.h"
 #include "rocksdb/slice.h"
 #include "db/lookup_key.h"
+#include "db/dbformat.h"
+#include "util/coding.h"
 #include "lock_free_skiplist_no_durability.h"
 
 
 namespace ROCKSDB_NAMESPACE {
 
 // ==================== LockFreeSkiplistMemtable ====================
+SkiplistOriginal<int> skiplist; // Global skiplist instance for demonstration
 
 LockFreeSkiplistMemtable::LockFreeSkiplistMemtable(
     const KeyComparator& cmp, Allocator* allocator,
@@ -33,14 +36,53 @@ void LockFreeSkiplistMemtable::Insert(KeyHandle handle) {
 }
 
 bool LockFreeSkiplistMemtable::InsertKey(KeyHandle handle) {
-  (void)handle;
-  // For now, just pretend insertion succeeded
-    printf("[STUB] LockFreeSkiplistMemtable::InsertKey\n");
+  printf("[STUB] LockFreeSkiplistMemtable::InsertKey\n");
+  
+  const char* data = reinterpret_cast<const char*>(handle);
+  
+  // Extract key_len (varint32)
+  uint32_t key_len = 0;
+  const char* p = GetVarint32Ptr(data, data + 5, &key_len);
+  printf("  Key length (varint32): %u bytes\n", key_len);
+  
+  // Extract internal_key which is [user_key + seq+type (8 bytes)]
+  Slice internal_key(p, key_len);
+  printf("  Internal key size: %zu bytes\n", internal_key.size());
+  
+  // Extract user_key (everything except last 8 bytes of internal_key)
+  Slice user_key = ExtractUserKey(internal_key);
+  printf("  User key: '%.*s' (size: %zu bytes)\n", 
+         static_cast<int>(user_key.size()), user_key.data(), user_key.size());
+  
+  // Extract seq+type (last 8 bytes of internal_key)
+  uint64_t packed = ExtractInternalKeyFooter(internal_key);
+  printf("  Packed seq+type (hex): 0x%016lx\n", packed);
+  
+  // Unpack sequence and type
+  uint64_t sequence = 0;
+  ValueType type = kTypeValue;
+  UnPackSequenceAndType(packed, &sequence, &type);
+  printf("  Sequence number: %lu\n", sequence);
+  printf("  Value type: %u (%s)\n", static_cast<unsigned>(type),
+         type == kTypeValue ? "kTypeValue" :
+         type == kTypeDeletion ? "kTypeDeletion" :
+         type == kTypeMerge ? "kTypeMerge" : "other");
+  
+  // Extract value_len and value
+  const char* value_start = p + key_len;
+  uint32_t val_len = 0;
+  Slice val_slice(value_start, 5);
+  GetVarint32(&val_slice, &val_len);
+  printf("  Value length (varint32): %u bytes\n", val_len);
+  
+  // Print the value
+  Slice value_data(value_start + VarintLength(val_len), val_len);
+  printf("  Value: '%.*s'\n", static_cast<int>(value_data.size()), value_data.data());
+  
+  skiplist.add(reinterpret_cast<uintptr_t>(handle), 0);
   entry_count_++;
   return true;
-}
-
-void LockFreeSkiplistMemtable::InsertConcurrently(KeyHandle handle) {
+}void LockFreeSkiplistMemtable::InsertConcurrently(KeyHandle handle) {
   (void)handle;
   printf("[STUB] LockFreeSkiplistMemtable::InsertConcurrently\n");
   // Concurrent insert - same as regular insert for now
