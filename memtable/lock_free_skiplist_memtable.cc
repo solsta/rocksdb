@@ -4,6 +4,7 @@
 #include "rocksdb/comparator.h"
 #include "rocksdb/slice.h"
 #include "db/lookup_key.h"
+#include "lock_free_skiplist_no_durability.h"
 
 
 namespace ROCKSDB_NAMESPACE {

@@ -1,11 +1,12 @@
-ifndef SKIPLIST_ORIGINAL_HPP_
-#define SKIPLIST_ORIGINAL_HPP_
+#pragma once
 
-#include<bits/stdc++.h> 
-#include<atomic>
+//#include<bits/stdc++.h> 
+//#include<atomic>
 
 #include"/home/se00598/home/se00598/vanila_flit/flit/common/rand_r_32.h"
-#include"/home/se00598/home/se00598/vanila_flit/flit/common/ssmem_wrapper.hpp"
+//#include"/home/se00598/home/se00598/vanila_flit/flit/common/ssmem_wrapper.hpp"
+
+#define ALIGNMENT 64
 
 template <class T> class alignas(ALIGNMENT) SkiplistOriginal {
 private:
@@ -93,15 +94,22 @@ private:
   }
 
 public:
+    void *allocate_memory_concurrent_for_concurrent_data_structure(size_t size) {
+      void* ptr = malloc(size); // TODO: replace with ssmem
+      return ptr;
+    }
+    void deallocate_memory_concurrent_for_concurrent_data_structure(void* ptr) {
+      free(ptr); // TODO: replace with ssmem
+    }
 
   SkiplistOriginal(int) : SkiplistOriginal() {}
 
   SkiplistOriginal() {
     Node *min, *max;
-    max = static_cast<Node*>(ssmem.alloc(sizeof(Node), false));
+    max = static_cast<Node*>(allocate_memory_concurrent_for_concurrent_data_structure(sizeof(Node)));
     //max = static_cast<Node*>(malloc(sizeof(Node)));
     new (max) Node(INT_MAX, 0, nullptr, MAX_LEVEL);
-    min = static_cast<Node*>(ssmem.alloc(sizeof(Node), false));
+    min = static_cast<Node*>(allocate_memory_concurrent_for_concurrent_data_structure(sizeof(Node)));
     //min = static_cast<Node*>(malloc(sizeof(Node)));
     new (min) Node(INT_MIN, 0, max, MAX_LEVEL);
     this->head = min;
@@ -113,7 +121,8 @@ public:
     while (node != NULL)
     {
       next = node->getNext(0);
-      ssmem.free(node, false);
+      //ssmem.free(node, false);
+      deallocate_memory_concurrent_for_concurrent_data_structure(node);
       node = next;
     }
             // ssfree(set);
@@ -178,7 +187,7 @@ public:
     if (found) {
       return false;
     }
-    newNode = static_cast<Node*>(ssmem.alloc(sizeof(Node), false)); 
+    newNode = static_cast<Node*>(allocate_memory_concurrent_for_concurrent_data_structure(sizeof(Node))); 
     //newNode = static_cast<Node*>(malloc(sizeof(Node))); 
     new (newNode) Node(key, val, nullptr, get_rand_level());
 
@@ -189,7 +198,8 @@ public:
           /* Node is visible once inserted at lowest level */
     Node *before = getCleanReference(succs[0]);
     if (!preds[0]->CASNext(before, newNode, 0)) {
-      ssmem.free(newNode, false);
+      //ssmem.free(newNode, false);
+      deallocate_memory_concurrent_for_concurrent_data_structure(newNode);
       goto retry;
     }
     for (int i = 1; i < newNode->toplevel; i++) {
@@ -247,14 +257,16 @@ private:
       bool cas = false;
                     /* Ensure left and right nodes are adjacent */
       if (left_next != right) {
-        bool cas = left->CASNext(left_next, right, i);
+        
+        cas = left->CASNext(left_next, right, i);
         if (!cas) {
           goto retry;
         }
       }
       if (i == 0 && cas) {
         for(int j = 0; j < num_nodes-1; j++) {
-          ssmem.free(nodes[j], false);
+          //ssmem.free(nodes[j], false);
+          deallocate_memory_concurrent_for_concurrent_data_structure(nodes[j]);
         }
       }
       if (left_list != nullptr) {
@@ -348,5 +360,3 @@ private:
 
 template<typename T> unsigned int SkiplistOriginal<T>::random_seed = 323423;
 template<typename T> thread_local typename SkiplistOriginal<T>::Node* SkiplistOriginal<T>::nodes[1024];
-
-#endif /* SKIPLIST_ORIGINAL_HPP_ */
