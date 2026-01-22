@@ -141,6 +141,7 @@ LIB_SOURCES =                                                   \
   memtable/alloc_tracker.cc                                     \
   memtable/hash_linklist_rep.cc                                 \
   memtable/hash_skiplist_rep.cc                                 \
+  memtable/lock_free_skiplist_memtable.cc                       \
   memtable/skiplistrep.cc                                       \
   memtable/vectorrep.cc                                         \
   memtable/vector_ordered_rep.cc                                \

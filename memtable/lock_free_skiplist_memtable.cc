@@ -70,8 +70,8 @@ MemTableRep::Iterator* LockFreeSkiplistMemtable::GetIterator(Arena* arena) {
 }
 
 size_t LockFreeSkiplistMemtable::ApproximateMemoryUsage() {
-  printf("[STUB] LockFreeSkiplistMemtable::ApproximateMemoryUsage\n");
-  assert(false && "ApproximateMemoryUsage stub - not implemented");
+  printf("[STUB] LockFreeSkiplistMemtable::ApproximateMemoryUsage, Retuns 0 same way as the skiplistrep.cc\n");
+   // All memory is allocated through allocator; nothing to report here
   return 0;
 }
 
